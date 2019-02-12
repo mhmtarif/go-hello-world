@@ -11,6 +11,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hi there, I'm served from %s!", h)
 }
 func main() {
+	fmt.Println("selamlar")
 	http.HandleFunc("/", handler)
 	err := http.ListenAndServe(":443", nil)
 	if err != nil {
