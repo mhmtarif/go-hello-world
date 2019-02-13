@@ -1,15 +1,22 @@
-# Start from a Debian image with the latest version of Go installed
-# and a workspace (GOPATH) configured at /go.
-FROM golang
-
-# create the user
-RUN useradd -r -s /bin/false helloworld
-# Go get and build
-RUN go get github.com/willejs/go-hello-world
-RUN go install github.com/willejs/go-hello-world
-
-# Run the service
-ENTRYPOINT /go/bin/go-hello-world
-
-# Document that the service listens on port 8080.
-EXPOSE 8484
+############################
+# STEP 1 build executable binary
+############################
+FROM golang:alpine AS builder
+# Install git.
+# Git is required for fetching the dependencies.
+RUN apk update && apk add --no-cache git
+WORKDIR /go/bin
+COPY . .
+# Fetch dependencies.
+# Using go get.
+RUN go get -d -v
+# Build the binary.
+RUN go build -o /go/bin/hello
+############################
+# STEP 2 build a small image
+############################
+FROM icalialabs/wkhtmltopdf
+# Copy our static executable.
+COPY --from=builder /go/bin/hello /go/bin/hello
+# Run the hello binary.
+ENTRYPOINT ["/go/bin/hello"]
